@@ -4,70 +4,98 @@ body {
   font-family: 'Courier New', Courier, monospace;
   margin: 0;
 }
+.App { text-align: center; padding: 20px; min-height: 100vh; }
 
-.App {
-  text-align: center;
-  padding: 20px;
-  min-height: 100vh;
+.App-header h1 { font-size: 3rem; margin-bottom: 10px; letter-spacing: 4px; }
+.App-header p { color: #666; letter-spacing: 2px; }
+
+/* Diagnosis Container */
+.diagnosis-container {
+    width: 90%;
+    max-width: 900px;
+    margin: 0 auto 30px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-/* Header */
-.App-header h1 {
-  font-size: 3rem;
-  margin-bottom: 10px;
-  text-transform: uppercase;
-  letter-spacing: 4px;
+.insight-box {
+    background-color: #111;
+    border-left: 4px solid #888;
+    padding: 15px;
+    text-align: left;
+    font-size: 1rem;
+    color: #ddd;
 }
 
-.App-header p {
-  color: #666;
-  font-size: 0.9rem;
-  letter-spacing: 2px;
+.prescription-box {
+    background-color: #1a0505;
+    border: 1px solid #ff4444;
+    padding: 15px;
+    text-align: left;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #ff8888;
+    border-radius: 4px;
 }
 
-/* Layout */
+.label {
+    color: #fff;
+    font-weight: normal;
+    margin-right: 10px;
+    opacity: 0.7;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+/* Animation for Urgent Alerts */
+@keyframes blinker {
+  50% { opacity: 0.8; border-color: red; background-color: #330000; }
+}
+.blink {
+    animation: blinker 1.5s linear infinite;
+}
+
+/* Dashboard Layout */
 .dashboard-grid {
-  display: flex;
-  gap: 30px;
-  justify-content: center;
-  margin-top: 50px;
-  flex-wrap: wrap;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 30px;
+    flex-wrap: wrap;
 }
 
-/* Cards */
 .card {
-  background-color: #161616;
-  border: 1px solid #333;
-  border-radius: 12px;
-  padding: 30px;
-  width: 45%;
-  min-width: 350px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.7);
-  transition: border-color 0.3s ease;
+    background-color: #161616;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 20px;
+    flex: 1 1 300px; 
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.7);
 }
 
 .card h2, .card h3 {
-  color: #888;
-  font-size: 1rem;
-  letter-spacing: 2px;
-  margin-top: 0;
+    color: #888;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    margin-top: 0;
 }
 
-/* Score Text */
 .score-display {
-  font-size: 100px;
-  font-weight: bold;
-  margin: 20px 0;
-  text-shadow: 0 0 20px rgba(255,255,255,0.1);
-  font-family: sans-serif;
+    font-size: 60px;
+    font-weight: bold;
+    margin: 15px 0;
+    text-shadow: 0 0 20px rgba(255,255,255,0.1);
+    font-family: sans-serif;
 }
 
-/* Status Badge */
 .status-badge {
-  display: inline-block;
-  padding: 8px 20px;
-  border-radius: 4px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 0.8rem;
 }
