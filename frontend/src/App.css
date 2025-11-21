@@ -1,0 +1,73 @@
+body {
+  background-color: #0a0a0a;
+  color: #e0e0e0;
+  font-family: 'Courier New', Courier, monospace;
+  margin: 0;
+}
+
+.App {
+  text-align: center;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+/* Header */
+.App-header h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+}
+
+.App-header p {
+  color: #666;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+}
+
+/* Layout */
+.dashboard-grid {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  margin-top: 50px;
+  flex-wrap: wrap;
+}
+
+/* Cards */
+.card {
+  background-color: #161616;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 30px;
+  width: 45%;
+  min-width: 350px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+  transition: border-color 0.3s ease;
+}
+
+.card h2, .card h3 {
+  color: #888;
+  font-size: 1rem;
+  letter-spacing: 2px;
+  margin-top: 0;
+}
+
+/* Score Text */
+.score-display {
+  font-size: 100px;
+  font-weight: bold;
+  margin: 20px 0;
+  text-shadow: 0 0 20px rgba(255,255,255,0.1);
+  font-family: sans-serif;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
