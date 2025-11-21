@@ -50,8 +50,9 @@ class NeuroTracker:
 
     def calculate_metrics(self):
         with self.lock:
-            # 1. IDLE CHECK: If no movement for 0.1s, everything is 0
-            if time.time() - self.last_move_time > 0.1:
+            # 1. IDLE CHECK: If no movement for 0.15s, reset live metrics to 0
+            if time.time() - self.last_move_time > 0.15:
+                # Return: Jitter=0, Meters=Current, Efficiency=0 (Idle)
                 return 0.0, (self.total_pixels_moved / 39370.0), 0.0
             
             # Need enough data to calculate efficiency
@@ -83,10 +84,10 @@ class NeuroTracker:
             final_jitter = max(0, min(jitter_score, 100))
 
             # --- METRIC 2: REAL-TIME COGNITIVE EFFICIENCY ---
-            # Calculate Actual Path Length (Sum of all steps)
+            # Actual Path Length
             actual_path_dist = df['speed'].sum()
             
-            # Calculate Ideal Path Length (Straight line from Start to End of buffer)
+            # Ideal Path Length (Start to End)
             start_point = self.mouse_data[0]
             end_point = self.mouse_data[-1]
             ideal_dist = np.sqrt((end_point['x'] - start_point['x'])**2 + (end_point['y'] - start_point['y'])**2)
@@ -96,7 +97,7 @@ class NeuroTracker:
             else:
                 efficiency = 0.0
             
-            # Noise filter: If efficiency > 100 (impossible) clamp it
+            # Clamp efficiency
             efficiency = max(0, min(efficiency, 100))
 
             # --- METRIC 3: DISTANCE ---
@@ -111,21 +112,34 @@ tracker.start()
 def get_data():
     score, meters, efficiency = tracker.calculate_metrics()
     
+    # 1. Determine Status Color
     status = "CALM"
     if score > 35: status = "FATIGUE"
     if score > 65: status = "TREMOR"
     
-    # Smart Insights
+    # 2. The AI Wellness Prescription Engine
     insight = "System Optimal."
+    prescription = "Maintain current workflow."
     
+    # PRIORITY 1: Idle
     if score == 0 and efficiency == 0:
-        insight = "User Idle. Monitoring suspended."
+        insight = "User Idle."
+        prescription = "None."
+        
+    # PRIORITY 2: Cognitive Burnout (Confused Movement)
     elif efficiency < 50:
-        insight = "Cognitive Load High. Movement is erratic/confused."
+        insight = "Cognitive Efficiency Low (Brain Fog detected)."
+        prescription = "ACTION: 20-20-20 Rule. Look 20ft away for 20s."
+
+    # PRIORITY 3: Physical Overload
+    elif meters > 500: # Set low for demo, higher for real life
+        insight = "Wrist Travel Limit Exceeded (>500m)."
+        prescription = "ACTION: Perform Wrist Flexor Stretch immediately."
+
+    # PRIORITY 4: Nervous System Stress (Jitter)
     elif score > 40:
-        insight = "Motor fatigue detected. Precision degrading."
-    elif meters > 500:
-        insight = "RSI Risk High. Distance limit exceeded."
+        insight = "Neurological Micro-Tremors detected."
+        prescription = "ACTION: Box Breathing. Inhale 4s, Hold 4s, Exhale 4s."
         
     return jsonify({
         "score": round(score, 1),
@@ -133,9 +147,10 @@ def get_data():
         "meters": round(meters, 2),
         "efficiency": round(efficiency, 0),
         "insight": insight,
+        "prescription": prescription,
         "timestamp": time.time()
     })
 
 if __name__ == '__main__':
-    print("Starting Real-Time Engine...")
+    print("Starting NeuroCursor Wellness Engine...")
     app.run(debug=True, port=5000)
