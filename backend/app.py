@@ -27,7 +27,7 @@ class NeuroTracker:
             current_time = time.time()
             self.last_move_time = current_time
             
-            # CALCULATE TOTAL DISTANCE (Accumulator)
+            # CALCULATE TOTAL DISTANCE
             if self.prev_x is not None:
                 dist = np.sqrt((x - self.prev_x)**2 + (y - self.prev_y)**2)
                 self.total_pixels_moved += dist
@@ -38,7 +38,7 @@ class NeuroTracker:
             # Add to buffer
             self.mouse_data.append({'x': x, 'y': y})
             
-            # Rolling Window: Keep last 50 points for live calc
+            # Keep last 50 points
             if len(self.mouse_data) > 50: 
                 self.mouse_data.pop(0)
 
@@ -50,18 +50,16 @@ class NeuroTracker:
 
     def calculate_metrics(self):
         with self.lock:
-            # 1. IDLE CHECK: If no movement for 0.15s, reset live metrics to 0
+            # IDLE CHECK
             if time.time() - self.last_move_time > 0.15:
-                # Return: Jitter=0, Meters=Current, Efficiency=0 (Idle)
                 return 0.0, (self.total_pixels_moved / 39370.0), 0.0
             
-            # Need enough data to calculate efficiency
             if len(self.mouse_data) < 5:
                 return 0.0, (self.total_pixels_moved / 39370.0), 0.0
             
             df = pd.DataFrame(self.mouse_data)
             
-            # --- METRIC 1: JITTER (Tremor) ---
+            # JITTER CALCULATION
             df['dx'] = df['x'].diff().fillna(0)
             df['dy'] = df['y'].diff().fillna(0)
             df['speed'] = np.sqrt(df['dx']**2 + df['dy']**2)
@@ -73,7 +71,6 @@ class NeuroTracker:
             else:
                 moving_df['angle'] = np.arctan2(moving_df['dy'], moving_df['dx'])
                 moving_df['angle_change'] = moving_df['angle'].diff().abs()
-                # Fix Wrap-around
                 moving_df['angle_change'] = np.where(
                     moving_df['angle_change'] > np.pi, 
                     2*np.pi - moving_df['angle_change'], 
@@ -83,11 +80,8 @@ class NeuroTracker:
             
             final_jitter = max(0, min(jitter_score, 100))
 
-            # --- METRIC 2: REAL-TIME COGNITIVE EFFICIENCY ---
-            # Actual Path Length
+            # EFFICIENCY CALCULATION
             actual_path_dist = df['speed'].sum()
-            
-            # Ideal Path Length (Start to End)
             start_point = self.mouse_data[0]
             end_point = self.mouse_data[-1]
             ideal_dist = np.sqrt((end_point['x'] - start_point['x'])**2 + (end_point['y'] - start_point['y'])**2)
@@ -97,10 +91,7 @@ class NeuroTracker:
             else:
                 efficiency = 0.0
             
-            # Clamp efficiency
             efficiency = max(0, min(efficiency, 100))
-
-            # --- METRIC 3: DISTANCE ---
             meters = self.total_pixels_moved / 39370.0
             
             return final_jitter, meters, efficiency
@@ -112,35 +103,36 @@ tracker.start()
 def get_data():
     score, meters, efficiency = tracker.calculate_metrics()
     
-    # 1. Determine Status Color
+    # Status Logic
     status = "CALM"
     if score > 35: status = "FATIGUE"
     if score > 65: status = "TREMOR"
     
-    # 2. The AI Wellness Prescription Engine
+    # Prescription Logic
     insight = "System Optimal."
     prescription = "Maintain current workflow."
     
-    # PRIORITY 1: Idle
     if score == 0 and efficiency == 0:
         insight = "User Idle."
         prescription = "None."
-        
-    # PRIORITY 2: Cognitive Burnout (Confused Movement)
     elif efficiency < 50:
-        insight = "Cognitive Efficiency Low (Brain Fog detected)."
-        prescription = "ACTION: 20-20-20 Rule. Look 20ft away for 20s."
-
-    # PRIORITY 3: Physical Overload
-    elif meters > 500: # Set low for demo, higher for real life
-        insight = "Wrist Travel Limit Exceeded (>500m)."
-        prescription = "ACTION: Perform Wrist Flexor Stretch immediately."
-
-    # PRIORITY 4: Nervous System Stress (Jitter)
+        insight = "Cognitive Efficiency Low (Brain Fog)."
+        prescription = "ACTION: 20-20-20 Vision Break."
+    elif meters > 500:
+        insight = "Wrist Travel Limit Exceeded."
+        prescription = "ACTION: Wrist Stretches."
     elif score > 40:
         insight = "Neurological Micro-Tremors detected."
-        prescription = "ACTION: Box Breathing. Inhale 4s, Hold 4s, Exhale 4s."
-        
+        prescription = "ACTION: Box Breathing (4-4-4)."
+
+    # GET LAST COORDINATE (For the Map)
+    last_x = 0
+    last_y = 0
+    with tracker.lock:
+        if len(tracker.mouse_data) > 0:
+            last_x = tracker.mouse_data[-1]['x']
+            last_y = tracker.mouse_data[-1]['y']
+
     return jsonify({
         "score": round(score, 1),
         "status": status,
@@ -148,9 +140,11 @@ def get_data():
         "efficiency": round(efficiency, 0),
         "insight": insight,
         "prescription": prescription,
+        "x": last_x,
+        "y": last_y,
         "timestamp": time.time()
     })
 
 if __name__ == '__main__':
-    print("Starting NeuroCursor Wellness Engine...")
+    print("Starting NeuroCursor Engine...")
     app.run(debug=True, port=5000)
